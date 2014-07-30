@@ -1,0 +1,20 @@
+8,1Help on GUARDM                Minimum Access:  450
+-
+SYNTAX:
+k9 guardm #channelname  <+/-MODES>
+-
+HELP:
+This command set the modes into strict mode so only
+k9 can be asked to change it. If no modes are
+specified then K9 will reply with the currently guarded
+
+modes.
+If you use '-' k9 will unset the given modes after the
+sign.
+-
+HELP:
+k9 guardm #nuthouse +mnt
+This command will make k9 change #nuthouse modes
+to +mnt (moderated/no external messages/only op's can
+change the topic).
+

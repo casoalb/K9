@@ -1,0 +1,19 @@
+8,1Help on ONJOIN                     Minimum Access:  450
+
+-
+SYNTAX:
+k9 onjoin #channelname <CLEAR>
+k9 onjoin #channelname <ADD> <new onjoin message>
+-
+HELP:
+This command set the comment that k9 will say when
+people join the channel, like a list of Rules or whatever
+
+you want to put there.
+The first Line on Syntax, will erase all comment lines on
+
+the channel.
+The second line (with ADD) will Add a new line to the
+channel comment. You can use Colors and whatever in
+the Text up to the Maximum of 5 lines.
+

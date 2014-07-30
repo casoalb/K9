@@ -1,0 +1,19 @@
+8,1Help on UNBAN                   Minimum Access:  75
+-
+SYNTAX:
+k9 unban #channelname <nick!user@host>
+-
+HELP:
+The command unban removes bans for a given
+nick!user@host pattern.
+To remove all k9 bans use * as the user@host pattern.
+You can use wildcards anywhere in the pattern.
+-
+EXAMPLE:
+k9 unban #help *!*@*.aol.com
+This will unban all 'aol' users that are eventually
+banned in the channel #help
+k9 unban *guam*
+This command will unban all bans that have the word
+'guam' in any place on the ban (* replaces any text).
+

@@ -1,0 +1,15 @@
+8,1Help on SND                      Minimum Access: 500
+-
+SYNTAX:
+k9 snd #channelname <sound file> <comment>
+-
+HELP:
+This command Makes K9 Play a Sound file to the channel
+and also say a small comment about the file that is
+being played or whatever you wish to make him say.
+-
+EXAMPLE:
+k9 snd seducme.wav The Best !
+This makes k9 play that wav file and also makes k9 say
+* k9 The Best !
+

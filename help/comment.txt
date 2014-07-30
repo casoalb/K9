@@ -1,0 +1,23 @@
+8,1Help on COMMENT                   Minimum Access:  75
+
+-
+SYNTAX:
+k9 comment #channelname  <comment message>
+-
+HELP:
+Sets the Message K9 Will say when you join a Channel.
+If you wish for k9 to perform an action when you enter
+a channel then type the Syntax below:
+k9 comment #channelname $ACT <action you want>
+-
+Also K9 Can Play a Sound file when you enter and
+also state a Comment about it at the same time.
+The Syntax for that is below:
+k9 comment #channelname $SND <wavefile.wav> <Message>
+-
+Please remember the $SND and $ACT Commands are CASE
+SENSITIVE.
+-
+A wild card $NICK can be used anywhere in the
+comment message and k9 will use your current nick.
+

@@ -1,0 +1,33 @@
+8,1Help on BAN                       Minimum Access:  75
+-
+SYNTAX:
+k9 ban #channelname <nick> <time> <reason>
+k9 ban #channelname <nick!user@host.domain> <time> <reason>
+
+k9 ban #channelname <*!*user@*.domain> <reason>
+-
+EXAMPLE:
+This command bans and kicks the given nick or mask
+from the given channel or from the current channel (if
+none is given).
+For a given time and reason, If the ban is not
+in the channel banlist and the user re-enters the
+channel, the ban will be re-added and the user kicked
+again.
+If time is not specified then the default time is
+24 hrs.
+NOTE: time is always in min.
+-
+EXAMPLE:
+k9 ban #doghouse Thread 60 Enough Flooding !
+This will kick/ban Leon from #doghouse with the reason
+'Enough Flooding !' for 60 minutes.
+k9 ban #doghouse *!*jackal@* 60
+This command will ban all users that use *jackal as a
+username for 60 minutes (note that * means all words
+ending in 'jackal').
+k9 ban #doghouse *!*@*.com.tr Don't Evade Bans !
+This command will kick/ban all 'com.tr' users from #doghouse
+
+for 24 hours with that reason.
+This last ban is called a domain ban. 

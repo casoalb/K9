@@ -1,0 +1,14 @@
+8,1Help on INVITE                  Minimum Access:  100
+-
+SYNTAX:
+k9 invite #channelname <nick>
+-
+HELP:
+This command Invites the given nick to channelname
+or to the current channel (if none is given).
+You cannot use a reason for the invite.
+-
+EXAMPLE:
+k9 invite #chatzone Ragan
+This command will invite Ragan to #chatzone
+

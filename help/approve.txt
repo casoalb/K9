@@ -1,0 +1,6 @@
+\iHelp File for APPROVE                 Minimum access:    650\i
+Usage: \bapprove\b <channel> <email address> <user> <password>
+
+Using a temporary password [that you specifiy] will send an email
+to the user informing them of their successful channel registration,
+and will add the channel to the INITCHAN database.

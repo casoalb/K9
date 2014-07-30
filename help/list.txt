@@ -1,0 +1,14 @@
+8,1Help on LIST                    Minimum Access:   630
+-
+SYNTAX:
+k9 list [PATTERN]
+-
+HELP:
+Lists all registered channels matching the given pattern.
+(Channels with the PRIVATE option set are not listed.)
+-
+Example:
+k9 list #doghouse
+will list the specific channel if it is available.
+k9 list *
+will list whole channels

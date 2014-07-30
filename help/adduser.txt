@@ -1,0 +1,13 @@
+K9: 8,1 Help on ADDUSER               Minimum Access:  400 5,0
+K9: -
+K9: SYNTAX:
+K9: k9 adduser #channelname <nick> <LEVEL>
+K9: -
+K9: HELP:
+K9: This command will add the given user to k9 list as
+K9: a channel op with the specified Level.
+K9: -
+K9: EXAMPLE:
+K9: k9 adduser #Doghouse Thread 499
+K9: This will add Thread as a 499 level op in the
+K9: channel #Doghouse.

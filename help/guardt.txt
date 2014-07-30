@@ -1,0 +1,15 @@
+8,1Help on GUARDT                  Minimum Access:  450
+-
+SYNTAX:
+k9 guardt #channelname <T/F>
+-
+HELP:
+This command set the topic into strict mode.
+(if you use T) so only k9 can be asked to change it.
+-
+EXAMPLE:
+k9 guardt F
+This channel will unguard the Topic in this channel.
+After this all changes in topic made by channel op's
+will be active and isn't changed by k9.
+

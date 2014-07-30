@@ -1,0 +1,14 @@
+8,1Help on ACT                    Minimum Access:   500
+-
+SYNTAX:
+k9 act #channelname <action to perform>
+-
+HELP:
+Makes K9 preform an action inside the given channel
+or in the current channel if none is given.
+-
+Example:
+k9 act #funfactory Barks !
+will show on the channel this line:
+* k9 Barks !
+

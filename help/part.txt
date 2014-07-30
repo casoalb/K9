@@ -1,0 +1,11 @@
+8,1Help on PART                   Minimum Access:  450
+-
+SYNTAX:
+k9 part #channelname
+-
+HELP:
+part is used to make K9 part the given channel.
+Obviously, k9 will only part if he is there ;o) and if
+u have access enough to perform to command.
+To make k9 join again, check: k9 help join
+

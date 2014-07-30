@@ -1,0 +1,17 @@
+8,1Help on OP                       Minimum Access:  100
+-
+SYNTAX:
+k9 op #channelname  <nicklist>
+k9 op <nicklist>
+k9 op
+-
+HELP:
+This command give channel operator priviledges to the
+specified user(s).  <nicklist> can be one nick, or a list
+of nicks seperated by spaces
+-
+EXAMPLE:
+k9 op
+k9 op Thread Cathar 
+This command will Op you in this channel !
+

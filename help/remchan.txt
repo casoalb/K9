@@ -1,0 +1,9 @@
+8,1Help on REMCHAN               Minimum Access:  600
+-
+SYNTAX:
+k9 remchan #channelname
+-
+HELP:
+Removes the given channel from the authorized channels
+table.
+

@@ -1,0 +1,10 @@
+8,1Help on ADDCHAN               Minimum Access:  630
+-
+SYNTAX:
+k9 addchan #channelname [modes]
+-
+HELP:
+Adds the given channel to the authorized channels table
+with the specified modes.
+
+

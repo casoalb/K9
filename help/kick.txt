@@ -1,0 +1,12 @@
+8,1Help on KICK                       Minimum Access:  50
+
+-
+SYNTAX:
+k9 kick #channelname <nick>
+-
+HELP:
+This command Kicks the nick from the given Channel.
+-
+Example:
+If you want to kick Thread from the current channel
+type: k9 kick Thread 

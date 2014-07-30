@@ -1,0 +1,24 @@
+8,1Help on SUSPEND                    Minimum Access:  100
+
+-
+SYNTAX:
+k9 suspend #channelname <UserID> <SuspensionLEVEL>
+-
+HELP:
+suspend Demotes the user to a given level but does
+not remove the original level.
+If a user is level 400 and you suspend his mode to 200
+then the users effective level is only 200. He cannot use
+
+commands higher then his suspension level.
+This allows you to reduce access and still have k9
+remember the original access level.
+-
+EXAMPLE:
+Lets suppose you have a user with 499 access Level
+and you want to suspend him to 200.
+No one with more access then 200 can touch that user
+(remove him, moduser him).
+Only you will be able to do that since he is still
+registed at level 499 !
+

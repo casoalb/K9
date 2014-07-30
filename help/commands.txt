@@ -1,0 +1,10 @@
+8,1Help on COMMANDS                  Minimum Access:  0
+-
+SYNTAX:
+k9 commands #channelname
+-
+HELP:
+This command gives you the commands that are available
+to you on the given channel or on the current channel
+(if none is given).
+

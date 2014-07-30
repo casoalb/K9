@@ -1,0 +1,733 @@
+/* Routines to load/save NickServ data files.
+**
+** Based on ircdservices ver. by Andy Church
+** Chatnet modifications (c) 2001-2002
+**
+** E-mail: routing@lists.chatnet.org
+** Authors:
+**
+**      Vampire (vampire@alias.chatnet.org)
+**      Thread  (thread@alias.chatnet.org)
+**      MRX     (tom@rooted.net)
+**
+**      *** DO NOT DISTRIBUTE ***
+**/  
+	  
+/*************************************************************************/
+/*************************************************************************/
+
+#define SAFE(x) do {					\
+    if ((x) < 0) {					\
+	if (!forceload)					\
+	    fatal("Read error on %s", NickDBName);	\
+	failed = 1;					\
+	break;						\
+    }							\
+} while (0)
+
+static void load_old_ns_dbase(dbFILE *f, int ver)
+{
+    struct nickinfo_ {
+	NickInfo *next, *prev;
+	char nick[NICKMAX];
+	char pass[PASSMAX];
+	char *last_usermask;
+	char *last_realname;
+	time_t time_registered;
+	time_t last_seen;
+	long accesscount;
+	char **access;
+	long flags;
+	time_t id_stamp;
+	unsigned short memomax;
+	unsigned short channelcount;
+	char *url;
+	char *email;
+    } old_nickinfo;
+
+    int i, j, c;
+    NickInfo *ni, **last, *prev;
+    int failed = 0;
+
+    for (i = 33; i < 256 && !failed; i++) {
+	last = &nicklists[i];
+	prev = NULL;
+	while ((c = getc_db(f)) != 0) {
+	    if (c != 1)
+		fatal("Invalid format in %s", NickDBName);
+	    SAFE(read_variable(old_nickinfo, f));
+	    if (debug >= 3)
+		log("debug: load_old_ns_dbase read nick %s", old_nickinfo.nick);
+	    ni = scalloc(sizeof(NickInfo), 1);
+	    *last = ni;
+	    last = &ni->next;
+	    ni->prev = prev;
+	    prev = ni;
+	    strscpy(ni->nick, old_nickinfo.nick, NICKMAX);
+	    strscpy(ni->pass, old_nickinfo.pass, PASSMAX);
+	    ni->time_registered = old_nickinfo.time_registered;
+	    ni->last_seen = old_nickinfo.last_seen;
+	    ni->accesscount = old_nickinfo.accesscount;
+	    ni->flags = old_nickinfo.flags;
+	    ni->channelcount = 0;
+	    ni->channelmax = CSMaxReg;
+	    ni->language = DEF_LANGUAGE;
+	    /* ENCRYPTEDPW and VERBOTEN moved from ni->flags to ni->status */
+	    if (ni->flags & 4)
+		ni->status |= NS_VERBOTEN;
+	    if (ni->flags & 8)
+		ni->status |= NS_ENCRYPTEDPW;
+	    ni->flags &= ~0xE000000C;
+#ifdef USE_ENCRYPTION
+	    if (!(ni->status & (NS_ENCRYPTEDPW | NS_VERBOTEN))) {
+		if (debug)
+		    log("debug: %s: encrypting password for `%s' on load",
+				s_NickServ, ni->nick);
+		if (encrypt_in_place(ni->pass, PASSMAX) < 0)
+		    fatal("%s: Can't encrypt `%s' nickname password!",
+				s_NickServ, ni->nick);
+		ni->status |= NS_ENCRYPTEDPW;
+	    }
+#else
+	    if (ni->status & NS_ENCRYPTEDPW) {
+		/* Bail: it makes no sense to continue with encrypted
+		 * passwords, since we won't be able to verify them */
+		fatal("%s: load database: password for %s encrypted "
+		          "but encryption disabled, aborting",
+		          s_NickServ, ni->nick);
+	    }
+#endif
+	    if (old_nickinfo.url)
+		SAFE(read_string(&ni->url, f));
+	    if (old_nickinfo.email)
+		SAFE(read_string(&ni->email, f));
+	    SAFE(read_string(&ni->last_usermask, f));
+	    if (!ni->last_usermask)
+		ni->last_usermask = sstrdup("@");
+	    SAFE(read_string(&ni->last_realname, f));
+	    if (!ni->last_realname)
+		ni->last_realname = sstrdup("");
+	    if (ni->accesscount) {
+		char **access, *s;
+		if (ni->accesscount > NSAccessMax)
+		    ni->accesscount = NSAccessMax;
+		access = smalloc(sizeof(char *) * ni->accesscount);
+		ni->access = access;
+		for (j = 0; j < ni->accesscount; j++, access++)
+		    SAFE(read_string(access, f));
+		while (j < old_nickinfo.accesscount) {
+		    SAFE(read_string(&s, f));
+		    if (s)
+			free(s);
+		    j++;
+		}
+	    }
+	    ni->id_stamp = 0;
+	    if (ver < 3) {
+		ni->flags |= NI_MEMO_SIGNON | NI_MEMO_RECEIVE;
+	    } else if (ver == 3) {
+		if (!(ni->flags & (NI_MEMO_SIGNON | NI_MEMO_RECEIVE)))
+		    ni->flags |= NI_MEMO_SIGNON | NI_MEMO_RECEIVE;
+	    }
+	} /* while (getc_db(f) != 0) */
+	*last = NULL;
+    } /* for (i) */
+}
+
+#undef SAFE
+
+/*************************************************************************/
+
+#define SAFE(x) do {					\
+    if ((x) < 0) {					\
+	if (!forceload)					\
+	    fatal("Read error on %s", NickDBName);	\
+	return NULL;					\
+    }							\
+} while (0)
+
+NickInfo *load_nick(dbFILE *f, int ver)
+{
+    NickInfo *ni;
+    int32 tmp32;
+    int i;
+
+    ni = scalloc(sizeof(NickInfo), 1);
+    SAFE(read_buffer(ni->nick, f));
+    SAFE(read_buffer(ni->pass, f));
+    SAFE(read_string(&ni->url, f));
+    SAFE(read_string(&ni->email, f));
+    SAFE(read_string(&ni->last_usermask, f));
+    if (!ni->last_usermask)
+	ni->last_usermask = sstrdup("@");
+    SAFE(read_string(&ni->last_realname, f));
+    if (!ni->last_realname)
+	ni->last_realname = sstrdup("");
+    SAFE(read_string(&ni->last_quit, f));
+    SAFE(read_int32(&tmp32, f));
+    ni->time_registered = tmp32;
+    SAFE(read_int32(&tmp32, f));
+    ni->last_seen = tmp32;
+    SAFE(read_int16(&ni->status, f));
+    ni->status &= ~NS_TEMPORARY;
+#ifdef USE_ENCRYPTION
+    if (!(ni->status & (NS_ENCRYPTEDPW | NS_VERBOTEN))) {
+	if (debug)
+	    log("debug: %s: encrypting password for `%s' on load",
+		s_NickServ, ni->nick);
+	if (encrypt_in_place(ni->pass, PASSMAX) < 0)
+	    fatal("%s: Can't encrypt `%s' nickname password!",
+		  s_NickServ, ni->nick);
+	ni->status |= NS_ENCRYPTEDPW;
+    }
+#else
+    if (ni->status & NS_ENCRYPTEDPW) {
+	/* Bail: it makes no sense to continue with encrypted
+	 * passwords, since we won't be able to verify them */
+	fatal("%s: load database: password for %s encrypted "
+	      "but encryption disabled, aborting",
+	      s_NickServ, ni->nick);
+    }
+#endif
+    /* Store the _name_ of the link target in ni->link for now;
+     * we'll resolve it after we've loaded all the nicks */
+    SAFE(read_string((char **)&ni->link, f));
+    /* We actually recalculate link and channel counts later, but leave
+     * them in for now to avoid changing the data file format */
+    SAFE(read_int16(&ni->linkcount, f));
+    if (ni->link) {
+	SAFE(read_int16(&ni->channelcount, f));
+	/* No other information saved for linked nicks, since
+	 * they get it all from their link target */
+	ni->channelmax = CSMaxReg;
+	ni->language = DEF_LANGUAGE;
+    } else {
+	SAFE(read_int32(&ni->flags, f));
+	if (!NSAllowKillImmed)
+	    ni->flags &= ~NI_KILL_IMMED;
+	if (ver >= 9) {
+	    read_ptr((void **)&ni->suspendinfo, f);
+	} else if (ver == 8 && (ni->flags & 0x10000000)) {
+	    /* In version 8, 0x10000000 was NI_SUSPENDED */
+	    ni->suspendinfo = (SuspendInfo *)1;
+	}
+	if (ni->suspendinfo) {
+	    SuspendInfo *si = smalloc(sizeof(*si));
+	    SAFE(read_buffer(si->who, f));
+	    SAFE(read_string(&si->reason, f));
+	    SAFE(read_int32(&tmp32, f));
+	    si->suspended = tmp32;
+	    SAFE(read_int32(&tmp32, f));
+	    si->expires = tmp32;
+	    ni->suspendinfo = si;
+	}
+	SAFE(read_int16(&ni->accesscount, f));
+	if (ni->accesscount) {
+	    char **access;
+	    access = smalloc(sizeof(char *) * ni->accesscount);
+	    ni->access = access;
+	    for (i = 0; i < ni->accesscount; i++, access++)
+		SAFE(read_string(access, f));
+	}
+	SAFE(read_int16(&ni->channelcount, f));
+	SAFE(read_int16(&ni->channelmax, f));
+	if (ver <= 8) {
+	    /* Fields not initialized or updated properly */
+	    /* These will be updated by load_cs_dbase() */
+	    ni->channelcount = 0;
+	    if (ver == 5)
+		ni->channelmax = CSMaxReg;
+	}
+	SAFE(read_int16(&ni->language, f));
+	if (!langtexts[ni->language])
+	    ni->language = DEF_LANGUAGE;
+    }
+    /* Link and channel counts are recalculated later */
+    ni->linkcount = 0;
+    ni->channelcount = 0;
+    ni->historycount = 0;
+    return ni;
+}
+
+#undef SAFE
+
+/*************************************************************************/
+
+void load_ns_dbase(void)
+{
+    dbFILE *f;
+    int ver, i, c;
+    NickInfo *ni;
+    int failed = 0;
+
+    if (!(f = open_db(s_NickServ, NickDBName, "r")))
+	return;
+
+    switch (ver = get_file_version(f)) {
+      case 13:
+      case 12:
+      case 11:
+      case 10:
+      case 9:
+      case 8:
+      case 7:
+      case 6:
+      case 5:
+	for (i = 0; i < 256 && !failed; i++) {
+	    while ((c = getc_db(f)) != 0) {
+		if (c != 1)
+		    fatal("Invalid format in %s", NickDBName);
+		ni = load_nick(f, ver);
+		if (ni) {
+		    alpha_insert_nick(ni);
+		} else {
+		    failed = 1;
+		    break;
+		}
+	    }
+	}
+
+	/* Now resolve links */
+	for (ni = firstnick(); ni; ni = nextnick()) {
+	    if (ni->link) {
+		char *s = (char *)ni->link;
+		ni->link = findnick(s);
+		free(s);
+		if (ni->link)
+		    ni->link->linkcount++;
+	    }
+	}
+
+	break;
+
+      case 4:
+      case 3:
+      case 2:
+      case 1:
+	load_old_ns_dbase(f, ver);
+	break;
+
+      case -1:
+	fatal("Unable to read version number from %s", NickDBName);
+
+      default:
+	fatal("Unsupported version number (%d) on %s", ver, NickDBName);
+
+    } /* switch (version) */
+
+    close_db(f);
+}
+
+#undef SAFE
+
+/*************************************************************************/
+/*************************************************************************/
+
+#define SAFE(x) do { if ((x) < 0) goto fail; } while (0)
+
+void save_ns_dbase(void)
+{
+    dbFILE *f;
+    int i;
+    NickInfo *ni;
+    char **access;
+    static time_t lastwarn = 0;
+
+    if (!(f = open_db(s_NickServ, NickDBName, "w")))
+	return;
+    for (ni = firstnick(); ni; ni = nextnick()) {
+	SAFE(write_int8(1, f));
+	SAFE(write_buffer(ni->nick, f));
+	SAFE(write_buffer(ni->pass, f));
+	SAFE(write_string(ni->url, f));
+	SAFE(write_string(ni->email, f));
+	SAFE(write_string(ni->last_usermask, f));
+	SAFE(write_string(ni->last_realname, f));
+	SAFE(write_string(ni->last_quit, f));
+	SAFE(write_int32(ni->time_registered, f));
+	SAFE(write_int32(ni->last_seen, f));
+	SAFE(write_int16(ni->status, f));
+	if (ni->link) {
+	    SAFE(write_string(ni->link->nick, f));
+	    SAFE(write_int16(ni->linkcount, f));
+	    SAFE(write_int16(ni->channelcount, f));
+	} else {
+	    SAFE(write_string(NULL, f));
+	    SAFE(write_int16(ni->linkcount, f));
+	    SAFE(write_int32(ni->flags, f));
+	    SAFE(write_ptr(ni->suspendinfo, f));
+	    if (ni->suspendinfo) {
+		SAFE(write_buffer(ni->suspendinfo->who, f));
+		SAFE(write_string(ni->suspendinfo->reason, f));
+		SAFE(write_int32(ni->suspendinfo->suspended, f));
+		SAFE(write_int32(ni->suspendinfo->expires, f));
+	    }
+	    SAFE(write_int16(ni->accesscount, f));
+	    for (i=0, access=ni->access; i<ni->accesscount; i++, access++)
+		SAFE(write_string(*access, f));
+	    SAFE(write_int16(ni->channelcount, f));
+	    SAFE(write_int16(ni->channelmax, f));
+	    SAFE(write_int16(ni->language, f));
+	}
+    } /* for (ni) */
+    {
+	/* This is an UGLY HACK but it simplifies loading.  It will go away
+	 * in the next file version */
+	static char buf[256];
+	SAFE(write_buffer(buf, f));
+    }
+    close_db(f);
+    return;
+
+  fail:
+    restore_db(f);
+    log_perror("Write error on %s", NickDBName);
+    if (time(NULL) - lastwarn > WarningTimeout) {
+	wallops(NULL, "Write error on %s: %s", NickDBName,
+		strerror(errno));
+	lastwarn = time(NULL);
+    }
+}
+
+#undef SAFE
+
+/*************************************************************************/
+
+#define DB_NICK_FIELDS 22
+#define DB_NICK_ACCESS 1
+
+void db_nick_seti(NickInfo *ni, char *field, int value) {
+  char e_nickname[NICKMAX*2+1];
+
+  if (db_escape_string(e_nickname, ni->nick, sizeof(e_nickname)) == NULL)
+    return;
+
+  db_queryf("UPDATE nick SET %s='%d' WHERE channame='%s'", field, value,
+            e_nickname);
+
+}
+
+void db_nick_set(NickInfo *ni, char *field, char *value) {
+  char e_nickname[NICKMAX*2+1],
+       e_value[2048];
+
+  if (db_escape_string(e_nickname, ni->nick, sizeof(e_nickname)) == NULL)
+    return;
+
+  if (value) {
+    if (db_escape_string(e_value, value, sizeof(e_value)) == NULL)
+      return;
+  } else
+    strcpy(e_value, "");
+
+  db_queryf("UPDATE nick SET %s='%s' WHERE channame='%s'", field, e_value, 
+            e_nickname);
+
+}
+
+void db_nick_suspend(NickInfo *ni) {
+  char e_nickname[NICKMAX*2+1],
+       e_swho[NICKMAX*2+1],
+       e_sreason[1024];
+
+  if (db_escape_string(e_nickname, ni->nick, sizeof(e_nickname)) == NULL)
+    return;
+
+  if (db_escape_string(e_swho, ni->suspendinfo->who, sizeof(e_swho)) == NULL)
+    return;
+
+  if (db_escape_string(e_sreason, ni->suspendinfo->reason, sizeof(e_sreason)) == NULL)
+    return;
+
+  db_queryf("UPDATE nick SET swho='%s', sreason='%s', stime='%d', sexpires='%d'"
+            "WHERE channame='%s'", e_swho, e_sreason, ni->suspendinfo->suspended,
+            ni->suspendinfo->expires, e_nickname);
+
+}
+
+void db_nick_unsuspend(NickInfo *ni) {
+  char e_nickname[NICKMAX*2+1];
+
+  if (db_escape_string(e_nickname, ni->nick, sizeof(e_nickname)) == NULL)
+    return;
+
+  db_queryf("UPDATE nick SET swho='', sreason='', stime=0, sexpires=0 "
+            "WHERE channame='%s'", e_nickname);
+
+}
+
+void db_nick_delete(NickInfo *ni) {
+  char e_nickname[NICKMAX*2+1];
+
+  if (db_escape_string(e_nickname, ni->nick, sizeof(e_nickname)) == NULL)
+    return;
+
+  db_queryf("DELETE FROM nick WHERE channame='%s'", e_nickname);
+  db_queryf("DELETE FROM nick_access WHERE channame='%s'", e_nickname);
+
+}
+
+void db_load_nickaccess(NickInfo *ni) {
+  MYSQL_ROW row;
+  MYSQL_RES *res;
+  char e_nickname[NICKMAX*2+1],
+       **access;
+  uint16 fields, i;
+
+  if (db_escape_string(e_nickname, ni->nick, sizeof(e_nickname)) == NULL)
+    fatal("error: could not escape string [%s]", ni->nick);
+
+  if ((res = db_request("SELECT access FROM nick_access WHERE channame='%s' "
+                        "ORDER BY number", e_nickname)) == NULL)
+    fatal("dberror: querying [nick_access]  for [%s]", ni->nick);
+
+  if(mysql_num_rows(res) != ni->accesscount) {
+    mysql_free_result(res);
+    fatal("dberror: [nick_access] table has an invalid number or rows "
+        "for [%s]!", ni->nick);
+  }
+
+  if((fields = mysql_num_fields(res)) < DB_NICK_ACCESS) {
+    mysql_free_result(res);
+    fatal("dberror: less than [%d] fields in table [nick_access] "
+        "for [%s]", DB_NICK_ACCESS, ni->nick);
+  }
+
+  access = smalloc(sizeof(char *) * ni->accesscount);
+  ni->access = access;
+
+  for( i = 0; (row = mysql_fetch_row(res)); i++, access++)
+    copy_string(access, row[0]);
+
+  mysql_free_result(res); 
+  return;
+
+}
+
+static NickInfo *db_load_nick(char **crow) {
+  NickInfo *ni;
+  uint16 i = 0;
+
+  ni = scalloc(sizeof(NickInfo), 1);
+
+  if (findnick(crow[0]))
+    return(NULL);
+
+  if (debug)
+    log("debug: loading nick [%s]", crow[0]);
+
+  copy_buffer(ni->nick, crow[i++]);
+  alpha_insert_nick(ni);
+  copy_buffer(ni->pass, crow[i++]);
+  copy_string(&ni->url, crow[i++]);
+  copy_string(&ni->email, crow[i++]);
+
+  copy_string(&ni->last_usermask, crow[i++]);
+  if (!ni->last_usermask)
+    ni->last_usermask = sstrdup("@");
+
+  copy_string(&ni->last_realname, crow[i++]);
+  if (!ni->last_realname)
+    ni->last_realname = sstrdup("");
+
+  copy_string(&ni->last_quit, crow[i++]);
+  ni->time_registered = atol(crow[i++]);
+  ni->last_seen = atol(crow[i++]);
+  ni->status = atol(crow[i++]);
+  ni->status &= ~NS_TEMPORARY;
+
+#ifdef USE_ENCRYPTION
+  if (!(ni->status & (NS_ENCRYPTEDPW | NS_VERBOTEN))) {
+    if (debug)
+      log("debug: %s: encrypting password for `%s' on load",
+          s_NickServ, ni->nick);
+      if (encrypt_in_place(ni->pass, PASSMAX) < 0)
+        fatal("%s: Can't encrypt `%s' nickname password!",
+              s_NickServ, ni->nick);
+      ni->status |= NS_ENCRYPTEDPW;
+      db_nick_set(ni, "pass", ni->pass);
+      db_nick_seti(ni, "status", ni->status);
+  }
+#else
+  if (ni->status & NS_ENCRYPTEDPW) {
+    /* Bail: it makes no sense to continue with encrypted
+     * passwords, since we won't be able to verify them */
+    fatal("%s: load database: password for %s encrypted "
+          "but encryption disabled, aborting",
+          s_NickServ, ni->nick);
+  }
+#endif
+
+  copy_string((char **)&ni->link, crow[i++]);
+  ni->linkcount = atol(crow[i++]);
+  i++;
+  ni->flags = atol(crow[i++]);
+  ni->flags &= ~NI_KILL_IMMED;
+
+  if (strlen(crow[i]) > 0) {
+    SuspendInfo *si = smalloc(sizeof(*si));
+    copy_buffer(si->who, crow[i++]);
+    copy_string(&si->reason, crow[i++]);
+    si->suspended = atol(crow[i++]);
+    si->expires = atol(crow[i++]);
+    ni->suspendinfo = si;
+  } else {
+    ni->suspendinfo = NULL;
+    i += 4;
+  }
+
+  ni->accesscount = atol(crow[i++]);
+  if (ni->accesscount)
+    db_load_nickaccess(ni);
+  else
+    ni->access = NULL;
+
+  ni->channelcount = atol(crow[i++]);
+  ni->channelmax = atol(crow[i++]);
+  ni->language = atol(crow[i++]);
+
+  if (!langtexts[ni->language])
+    ni->language = DEF_LANGUAGE;
+
+  /* Link and channel counts are recalculated later */
+  ni->linkcount = 0;
+  ni->channelcount = 0;
+  ni->historycount = 0;
+  return(ni);
+
+}
+
+void db_load_ns(void) {
+  MYSQL_ROW crow;
+  MYSQL_RES *cres;
+  uint16 cfields;
+  NickInfo *ni;
+
+  if((cres = db_request("SELECT * FROM nick WHERE 1>0")) == NULL)
+    fatal("dberror: fatal db error during query");
+
+  if(mysql_num_rows(cres) == 0) {
+    /* create a blank nick list and continue some day */
+    fatal("dberror: the nick database is empty!");
+  }
+
+  if((cfields = mysql_num_fields(cres)) < DB_NICK_FIELDS) {
+    fatal("dberror: the database has less than [%d] fields in table [nick]",
+        DB_NICK_FIELDS);
+  }
+
+  while((crow = mysql_fetch_row(cres)))
+    db_load_nick(crow);
+
+  mysql_free_result(cres);
+
+  /* Now resolve links */
+  for (ni = firstnick(); ni; ni = nextnick()) {
+    if (ni->link) {
+      char *s = (char *)ni->link;
+      ni->link = findnick(s);
+      free(s);
+      if (ni->link)
+        ni->link->linkcount++;
+    }
+  }
+
+  return;
+
+}
+
+void db_add_access(NickInfo *ni, char *access) {
+  char e_nickname[NICKMAX*2+1],
+       e_access[1024];
+  int res;
+
+  if (db_escape_string(e_nickname, ni->nick, sizeof(e_nickname)) == NULL)
+    return;
+
+  if (db_escape_string(e_access, access, sizeof(e_access)) == NULL)
+    return;
+
+  db_queryf("INSERT INTO nick_access VALUES ('%s','9999','%s')",
+            e_nickname, e_access);
+
+  if ((res = db_update_numbers(e_nickname, "nick_access")) < 0)
+    return;
+
+  db_update_count(DB_NICKACCESS, ni->nick, res);
+
+}
+
+int db_add_nick(NickInfo *ni) {
+  char e_nick[NICKMAX*2+1],
+       e_pass[PASSMAX*2+1],
+       e_email[512],
+       e_url[512],
+       e_lastusermask[512],
+       e_lastrealname[128],
+       e_lastquit[1024],
+       e_linknick[NICKMAX*2+1],
+       e_swho[NICKMAX*2+1],
+       e_sreason[1024];
+  int i, res;
+
+  if (debug)
+    log("db_add_nick() adding nick [%s]", ni->nick);
+
+  for( i = 0; i < ni->accesscount; i++) 
+    db_add_access(ni, ni->access[i]);
+
+  if (db_escape_string(e_nick, ni->nick, sizeof(e_nick)) == NULL)
+    return(0);
+
+  if (db_escape_string(e_pass, ni->pass, sizeof(e_pass)) == NULL)
+    return(0);
+
+  db_escape_string(e_email, ni->email, sizeof(e_email));
+  db_escape_string(e_url, ni->url, sizeof(e_url));
+  db_escape_string(e_lastusermask, ni->last_usermask, sizeof(e_lastusermask));
+  db_escape_string(e_lastrealname, ni->last_realname, sizeof(e_lastrealname));
+  db_escape_string(e_lastquit, ni->last_quit, sizeof(e_lastquit));
+
+  if (ni->link) 
+    db_escape_string(e_linknick, ni->link->nick, sizeof(e_linknick));
+
+  if (ni->suspendinfo) {
+    db_escape_string(e_swho, ni->suspendinfo->who, sizeof(e_swho));
+    db_escape_string(e_sreason, ni->suspendinfo->reason, sizeof(e_sreason));
+  }
+
+  res = db_queryf("INSERT INTO nick VALUES ('%s','%s','%s','%s','%s','%s'"
+            ",'%s','%d','%d','%d','%s','%d','%d','%d','%s','%s','%d'"
+            ",'%d','%d','%d','%d','%d')",
+            e_nick,
+            e_pass,
+            e_url,
+            e_email,
+            e_lastusermask,
+            e_lastrealname,
+            e_lastquit,
+            ni->time_registered,
+            ni->last_seen,
+            ni->status,
+            ni->link ? e_linknick : "",
+            ni->link ? ni->linkcount : 0,
+            ni->link ? ni->channelcount : 0,
+            ni->flags,
+            ni->suspendinfo ? e_swho : "",
+            ni->suspendinfo ? e_sreason : "",
+            ni->suspendinfo ? ni->suspendinfo->suspended : 0,
+            ni->suspendinfo ? ni->suspendinfo->expires : 0,
+            ni->accesscount,
+            ni->channelcount,
+            ni->channelmax,
+            ni->language
+  );
+
+  if (res) {
+    log("dberror: adding nick [%s]", ni->nick);
+    return(DB_ERROR);
+  }
+
+  return(1);
+
+}

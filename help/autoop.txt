@@ -1,0 +1,15 @@
+8,1Help on AUTOOP              Minimum Access:  400
+-
+SYNTAX:
+k9 autoop #channelname <T/F/V>
+-
+HELP:
+This command set your nick auto op or auto voice
+flags for the given channel.
+A flag of V will Auto Voice you upon entering
+the channel.
+A flag of T will Auto Op you upon entering
+the channel.
+A flag of F will remove all Auto Functions from
+you.
+

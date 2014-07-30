@@ -1,0 +1,13 @@
+8,1Help on INFO                    Minimum Access:   0
+-
+SYNTAX:
+k9 info #channelname
+-
+HELP:	
+Lists information about the named registered channel,
+including its founder, time of registration, last time
+used, description, and mode lock, if any.
+- 
+Example:
+k9 info #doghouse
+

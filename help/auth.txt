@@ -1,0 +1,15 @@
+8,1Help on AUTH                        Minimum Access:  0
+
+-
+SYNTAX: /msg k9 auth #channelname <password>
+
+-
+HELP:
+This command is used to validate yourself on k9 (only if
+you have been added before and assigned a valid password).
+Everytime k9 goes on a Netsplit (when servers break
+connection) you must issue this command again in order
+to identify yourself to regain access.
+This is required before any commands with level larger
+than 0 can be used.
+

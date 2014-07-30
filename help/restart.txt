@@ -1,0 +1,9 @@
+8,1Help on RESTART                   Minimum Access:  800
+-
+SYNTAX:
+k9 restart <reason>
+-
+HELP:
+This command makes k9 restart  with a
+message.
+

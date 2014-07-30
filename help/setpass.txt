@@ -1,0 +1,12 @@
+8,1Help on SETPASS                   Minimum Access:   0
+-
+SYNTAX: /msg k9 setpass #channel <password>
+-
+HELP:
+This command will set your password on k9 when someone
+adds you to k9 access list in a channel.
+You can later change your password by typing this command
+again with the New Password after you identify first.
+To see how to identify yourself on k9 to gain access,
+check help on: k9 help auth
+

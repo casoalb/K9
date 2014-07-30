@@ -1,0 +1,14 @@
+8,1Help on BANLIST                  Minimum Access:  0
+-
+SYNTAX:
+k9 banlist #channelname
+-
+HELP:
+Lists the Channel Banlist as well the reason for the
+ban, Time the Ban was placed and time the ban will
+expire.
+-
+EXAMPLE:
+k9 banlist #doghouse
+Lists all bans from the channel #doghouse
+

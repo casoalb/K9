@@ -1,0 +1,18 @@
+
+8,1Help on ACCESS                Minimum Access:   0
+-
+SYNTAX:
+k9 access #channelname <nick>
+k9 access #channelname [*]
+k9 access #channelname 
+-
+HELP:
+Shows the access of nick on channelname.
+If NO nick is given, it shows the entire list of that
+channel.
+-
+EXAMPLES:
+k9 access #Doghouse or k9 access #Doghouse *
+will show the channel master of #Doghouse
+k9 access #Doghouse Thread
+will show the access of nick Thread on #Doghouse

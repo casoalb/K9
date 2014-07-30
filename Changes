@@ -1,0 +1,16 @@
+Changes made on: 1/15/2004
+Changes made by: abcX
+-------------------------
+[*] Added ping timeout detection. Made changes in Makefile, main.c, extern.h, messages.c,
+    and ping.c.
+[*] Changed the log routine to implement log rotation. Also, for better organization, files
+    will be kept in a separate log directory. For the time being, removal of old logs will
+    be manually done. In the event that K9 becomes stable enough, a remove_logfile routine
+    may be added. Altered log.c only.
+
+
+
+
+
+k9.c:   p[MASKLEN] = 0;
+k9.c:   p[MASKLEN] = '\0';

@@ -1,0 +1,19 @@
+8,1Help on JOIN                     Minimum Access:  450
+
+-
+SYNTAX:
+k9 join #channelname
+-
+HELP:
+join is used to make K9 join channelname.
+Obviously, k9 will only join the given channel if he was
+
+told to part first with the command part.
+-
+EXAMPLE:
+To make k9 join channel #fun you type: /msg k9 join #fun
+
+This command will make k9 join the given channel.
+You can also type in a channel that has k9: k9 join #fun
+
+

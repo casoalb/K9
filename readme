@@ -1,0 +1,214 @@
+K9 -- a set of IRC services for IRC networks
+===============================================
+
+K9 IRC Service by Thread (thread@techbench.net)
+		  Vampire (vampire@iglou.com)
+		  MRX (tom@rooted.net)
+                  sloth (sloth@nopninjas.com)
+
+Based on Services (c) 1996-1999 Andrew Church <achurch@dragonfire.net>.
+
+This program is free but copyrighted software; see the file COPYING for
+details.
+
+Latest information about K9 may be found at thread@techbench.net
+
+TABLE OF CONTENTS
+-----------------
+  1. Credits
+  2. Presentation
+  3. Installation
+  4. Command line options
+  5. Messages translation
+  6. Contact and mailing list
+
+1. CREDITS
+----------
+
+K9 IRC Services is based on Andy Church's IRC Services version 4.5.34
+
+The original credits:
+	Mauritz Antunes -- Portuguese translation
+	Jose R. Holzmann, Raul S. Villarreal -- Spanish translation
+	Andrew Kempe <theshadow@shadowfire.org> -- news system
+	<d.duca@eurcom.net> -- Italian translation
+	<mikado@holyfire.com> -- Turkish translation
+	Andrew Kempe <theshadow@shadowfire.org> -- session limiting
+K9 credits:
+    CafeiN <oytuny@yahoo.com> -- Turkish translation
+    Sylvain Cresto aka tost <scresto@netsante.fr> -- FreeBSD 5 patch
+    Marcelo Conde Foscarini aka Bras <ircadmin@brmarket.net> -- Portuguese translation
+    Alvaro Toledo aka POLLITO <atoledo@keldon.org> -- Spanish translation
+    chemical <chemical@musicplay.de> -- German translation
+    shine <dh@shinewelt.de> -- German translation
+    |SaMaN| <linuxworm@turk.net> -- Initial work which we backported out
+Contributed code to K9 in previous versions:
+    Thomas J. Stensas aka ShadowMaster <shadowmaster@shadow-realm.org> -- Ultimate 3.x support
+    
+2. PRESENTATION
+---------------
+
+K9 is a set of Services for IRC networks that allows users to
+manage their nicks and channels in a secure and efficient way, and
+administrators to manage their network with powerful tools.
+
+Currently available services are:
+
+  * NickServ, a powerful nickname manager that users can use to
+  protect themselves against nick stealing. Each user has its
+  own nickname group, that allows him to register as many nicks as
+  he needs while still being able to take profit of his privileges
+  and to modify his nick configuration. NickServ also has an optional 
+  password retrieval feature.
+
+  * K9, a powerful channel manager that helps users to administer
+  their channels in a totally customizable way. K9 has an internal
+  list of privilegied users and banned users that controls accesses
+  on a per-channel basis. It eliminates all takeover problems,
+  because of its powerful op/unban/invite.
+  
+K9 works with DreamForge and Bahamut IRCDs (and some of their 
+derivated).
+
+3. INSTALLATION
+---------------
+
+See the INSTALL file.
+
+4. COMMAND LINE OPTIONS
+-----------------------
+
+     Normally, K9 can be run simply by invoking the "services"
+executable.  K9 will then use the defaults specified in the
+services.conf file, and connect to the specified uplink server.
+Alternatively, any of the following command-line options can be specified
+to change the default values:
+
+	-remote server[:port]	Connect to the specified server
+	-local host  -or-	Connect from the specified address (e.g.
+	       [host]:[port]	    for multihomed servers)
+	-name servername	Our server name (e.g. services.some.net)
+	-desc string		Description of us (e.g. SomeNet Services)
+	-user username		Username for Services' nicks (e.g. services)
+	-host hostname		Hostname for Services' nicks (e.g. esper.net)
+	-dir directory		Directory containing Services' data files
+				    (e.g. /usr/local/lib/services)
+	-log filename		Services log filename (e.g. services.log)
+	-update secs		How often to update databases (in seconds)
+	-expire secs		How often to check for nick/channel
+				    expiration (in seconds)
+
+     Additionally, the following command-line options can be used to modify
+the behavior of K9:
+
+	-debug			Enable debugging mode--more info sent to log
+				    (give option more times for more info)
+	-readonly		Enable read-only mode--no changes to
+				    databases allowed, .db files and log
+				    not written
+	-skeleton		Enable skeleton mode--like read-only mode,
+				    but only OperServ is available
+	-nofork			Do not fork after startup; log messages will
+				    be written to terminal (as well as to
+				    the log file if not in read-only mode)
+	-forceload		Try to load as much of the databases as
+				    possible, even if errors are encountered
+	-noexpire       Expiration routines won't be run at all
+
+     Upon starting, K9 will parse its command-line parameters, open
+its logfile, then (assuming the -nofork option is not given) detach itself
+and run in the background.  If K9 encounters a problem reading the
+database files or cannot connect to its uplink server, it will terminate
+immediately; otherwise, it will run until the connection is terminated (or
+a QUIT, SHUTDOWN, or RESTART command is sent--see OperServ's help).  In the
+case of an error, an appropriate error message will be written to the log
+file.
+
+     If K9 is run with the "-readonly" command-line option, it can
+serve as a "backup" to the full version of services.  A "full" version of
+services (run without -readonly) will automatically reintroduce its
+pseudo-clients (NickServ, ChanServ, etc.), while a "backup" services will
+not, thus allowing full services to be brought up at any time without
+disrupting the network (and without having to take backup services down
+beforehand).
+
+     If K9 is run with the "-skeleton" command-line option, it will
+not try to load the nickname or channel databases, and will respond with
+"service is inactive" messages to any commands sent to NickServ.  
+This can be useful as an emergency stopgap measure 
+when the main copy of K9 cannot be started.
+
+     The "-debug" option is useful if you find or suspect a problem in
+K9. Giving it once on the command line will cause all traffic to and
+from services as well as some other debugging information to be recorded in
+the log file; if you send a bug report, PLEASE include an excerpt from the
+log file WITH DEBUGGING ACTIVE--I cannot emphasize enough how important
+this is to tracking down problems.  (You can also enable debugging while
+Services is running using OperServ's SET DEBUG command.)  If you repeat the
+-debug option more than once, the debugging level will be increased, which
+provides more detailed information but may also slow K9 down
+considerably and make the log file grow dramatically faster (in particular,
+at debug level 4 a message is written to the log for every character
+received from the server).  In general, a debug level of 1 is sufficient
+for me to be able to trace a problem, because all network traffic is
+included and I can usually reproduce the problem.
+
+     The "-forceload" option is provided to attempt recovery of data from
+corrupted or truncated databases.  Normally, if K9 encounters an
+error writing to a database file, it will attempt to restore the original
+version of the file and report an error to the logfile and through WALLOPS.
+However, if this should fail (which normally should not happen), or if
+K9 is terminated abruptly e.g. by kill -9 or a power failure, then
+one or more of the databases may be corrupt.  Normally, this will cause
+K9 to abort the next time you try to run it; however, if you give
+the -forceload option to K9, it will instead read as much as it can,
+then skip to the next database.  For obvious reasons, it's recommended to
+keep backup copies of your databases in case something does happen (since
+k9 will stop at the first error even with -forceload, meaning you
+lose any data after that).
+
+5. MESSAGES TRANSLATIONS
+------------------------
+
+k9 has a powerful option in NickServ allowing users to choose what
+language it must use when sending messages to users. Messages
+are stored in language files (located in the lang directory).
+
+k9 is currently provided with six languages: English, French, German,
+Portuguese, Spanish and Turkish. If you want to translate k9 messages 
+in another language, follow the following instructions:
+
+  * Copy the lang/en_us.l file to a meaningful name (for example, if
+    you would like to translate messages in Spanish, you would
+    rename it to es.l).
+  * Edit the file with your favourite text editor. Read carefully
+    the instructions given at the top of the file, and start
+    translating the whole file. The file is big so make sure you have
+    some coffee available. ;) Try to avoid the use of English words
+    as much as possible.
+  * When this is done, you have two solutions: either patch Services
+    source code so they take in account the new language file (basically,
+    you'll have to modify lang/Makefile, language.c and maybe services.h),
+    or send me the translated file so I can make the patch myself and
+    send it back to you.
+
+When new major releases come out, you'll not have to retranslate the whole
+file; the Changes.lang file will help you to know which messages were
+added, modified or deleted.
+
+If you did a language file translation, and want to let others use it,
+please send it to linuxworm@turk.net (don't forget to mention clearly your
+(nick)name, your e-mail and the language name). You'll of course get full
+credit for it, and will even get future final major releases before anyone 
+else to complete the translation!... ;) 
+
+6. CONTACT AND MAILING LIST
+---------------------------
+
+* If you read the documentation carefully, and didn't found the answer
+to your question, feel free to send a mail to thread@techbench.net. Be
+as precise as possible when asking a question, because I won't
+try to guess things (or ask you for them) if they aren't provided.
+
+* If you think you found a bug (AND ONLY FOR THIS PURPOSE), come on
+IRC (irc.chatnet.org port 6667) and try to catch me on channel #routing.

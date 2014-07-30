@@ -1,0 +1,15 @@
+8,1Help on SAY                   Minimum Access:  500
+-
+SYNTAX:
+k9 say #channelname <message to say>
+k9 say <message to say>
+-
+HELP:
+This command makes k9 send a message to the given
+channel.
+-
+EXAMPLE:
+k9 say I think you shouldn't do that Theresa !
+This will make k9 say in the current channel:
+<k9> I think you shouldn't do that Theresa !
+

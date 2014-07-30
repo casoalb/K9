@@ -1,0 +1,15 @@
+8,1Help on VOICE                  Minimum Access:  100
+-
+SYNTAX:
+k9 voice #channelname <nick>
+-
+HELP:
+This command gives channel voice priviledges to the
+specified user.
+If the channel is moderated (+m) only voiced users (+)
+and Op's (@) can chat.
+If the User in question is already Voiced but it isn't
+shown, if you try to voice him again, k9 will devoice him.
+
+This command acts as a Voice/Devoicer.
+

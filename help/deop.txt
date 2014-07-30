@@ -1,0 +1,17 @@
+8,1Help on DEOP                   Minimum Access:  100
+-
+SYNTAX:
+k9 deop #channelname <nicklist>
+k9 deop <nicklist>
+k9 deop
+-
+HELP:
+This command removes channel operator priviledges
+to the specified user(s). <nicklist> can be one nick,
+or a list of nicks seperated by spaces
+-
+EXAMPLE:
+k9 deop
+k9 deop Thread Cathar
+This will make k9 deop you in this channel !
+

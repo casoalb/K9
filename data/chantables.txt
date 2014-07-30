@@ -1,0 +1,76 @@
+# Here are the SQL commands to create the tables for the database
+
+CREATE TABLE channel (
+  channame VARCHAR(64),
+  foundernick VARCHAR(32),
+  successornick VARCHAR(32),
+  founderpass TINYBLOB,
+  chandesc TINYBLOB,
+  chanurl TINYBLOB,
+  email TINYBLOB,
+  time_registered INT(10) UNSIGNED,
+  last_used INT(10) UNSIGNED,
+  last_topic BLOB,
+  last_topic_setter VARCHAR(32),
+  last_topic_time INT(10) UNSIGNED,
+  flags INT(10) UNSIGNED,
+  swho VARCHAR(64),
+  sreason TINYBLOB,
+  stime INT(10) UNSIGNED,
+  sexpire INT(10) UNSIGNED,
+  n_levels INT(5) UNSIGNED,
+  levels TINYBLOB,
+  accesscount INT(5) UNSIGNED,
+  akickcount INT(5) UNSIGNED,
+  mlock_on INT(10) UNSIGNED,
+  mlock_off INT(10) UNSIGNED,
+  mlock_limit INT(10) UNSIGNED,
+  mlock_key TINYBLOB,
+  entrycount INT(5) UNSIGNED,
+  autoopcount INT(5) UNSIGNED,
+  commentcount INT(5) UNSIGNED
+);
+
+CREATE TABLE chan_access (
+  channame VARCHAR(64),
+  number INT(5) UNSIGNED,
+  level INT(5) UNSIGNED,
+  nick VARCHAR(64)
+);
+
+CREATE TABLE chan_akick (
+  channame VARCHAR(64),
+  number INT(5) UNSIGNED,
+  is_nick INT(5) UNSIGNED,
+  nick VARCHAR(64),
+  mask TINYTEXT,
+  reason TINYBLOB,
+  who VARCHAR(64)
+);
+
+CREATE TABLE chan_entrymsg (
+  channame VARCHAR(64),
+  number INT(5) UNSIGNED,
+  entrymsg TINYBLOB
+);
+
+CREATE TABLE chan_autoop (
+  channame VARCHAR(64),
+  number INT(5) UNSIGNED,
+  nick VARCHAR(64),
+  flag CHAR(1)
+);
+
+CREATE TABLE chan_comments (
+  channame VARCHAR(64),
+  number INT(5) UNSIGNED,
+  nick VARCHAR(64),
+  message BLOB
+);
+
+CREATE TABLE chan_levels (
+  channame VARCHAR(64),
+  number INT(5) UNSIGNED,
+  level INT(5) UNSIGNED
+);
+

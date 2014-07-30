@@ -1,0 +1,8 @@
+8,1Help on BROADCAST               Minimum Access:  650
+-
+SYNTAX:
+k9 broadcast <message>
+-
+HELP:
+This command makes k9 broadcast a message.
+

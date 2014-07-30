@@ -1,0 +1,24 @@
+8,1Initial HELP Menu                 Minimum Access:  0
+-
+SYNTAX:
+k9 help <command>
+-
+HELP:
+This displays specific help on the given command.
+(To see all your current available commands type:
+k9 commands)
+You can type the commands on the open channel as you
+enter text:
+K9 op #blah <nick> (To op the nick on that channel)
+k9 deop <nick> (To deop the nick in the current channel)
+
+-
+You can also use /msg to enter commands (this way only
+you will see when you enter the command):
+To op nick on channel #blah: /msg K9 op #blah <nick>
+To ban nick on channel #blah: /msg k9 ban #blah <nick>
+-
+When you use /msg you must ALWAYS enter the channel name
+
+after the command.
+

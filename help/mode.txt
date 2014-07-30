@@ -1,0 +1,23 @@
+8,1Help on MODE                    Minimum Access:  400
+-
+SYNTAX:
+k9 mode #channelname <+/-MODES>
+-
+HELP:
+This command set the modes for the given channel and
+put them into the database.
+For more Info, check k9 help guardm to see how to
+guard modes.
+if modes are guarded, only k9 can change them with
+the current command.
+-
+EXAMPLE:
+k9 mode #australia +nt
+-
+Sometimes the modes are present in the channel and
+they are not shown. If this happens for example in
+the channel #australia, do the following:
+K9 mode #australia -nt
+k9 mode #australia +nt
+They will become visible after these two commands :c)
+

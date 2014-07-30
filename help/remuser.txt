@@ -1,0 +1,17 @@
+K9: 8,1 Help on REMUSER                 Minimum Access:  400 5,0
+K9: -
+K9: SYNTAX:
+K9: k9 remuser #channelname <nick>
+K9: -
+K9: HELP:
+K9: remuser Removes the given access from the user.
+K9: After you Remove the user he will not have his access to
+K9: commands on k9 except all Level 0 commands that can be
+K9: used by everyone.
+K9: He will be stoped from using k9 in that channel unless
+K9: if he is added again to k9 database as an Op again.
+K9: -
+K9: EXAMPLE:
+K9: k9 remuser #Doghouse Thread
+K9: This command will remove Op with the nick Thread in
+K9: the channel #Doghouse

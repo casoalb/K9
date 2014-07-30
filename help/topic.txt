@@ -1,0 +1,12 @@
+8,1Help on TOPIC                   Minimum Access:  200
+-
+SYNTAX:
+k9 topic #channelname <new topic message>
+k9 topic <new topic message>
+-
+HELP:
+This command set the topic for the given channel and
+put into the database.
+To see how to make k9 guard the Topic, check k9 help
+guardt
+

@@ -1,0 +1,13 @@
+K9: 8,1 Help on MODUSER                  Minimum Access:  400 5,0
+K9: -
+K9: SYNTAX:
+K9: k9 moduser <nick> <NewLEVEL>
+K9: -
+K9: HELP:
+K9: This command  modifies a user level to a new Level.
+K9: The UserID is the following info you can see from a
+K9: -
+K9: EXAMPLE:
+K9: k9 moduser #Doghouse Thread 100
+K9: This command will modify Level to 100 on a nick that
+K9: has access on channel #Doghouse

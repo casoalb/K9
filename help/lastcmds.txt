@@ -1,0 +1,9 @@
+8,1Help on LASTCMDS               Minimum Access:  600
+-
+SYNTAX:
+k9 lastcmds
+-
+HELP:
+lastcmds gives you a total count of commands
+that have been proccessed.
+

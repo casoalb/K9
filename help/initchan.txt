@@ -1,0 +1,23 @@
+8,1Help on INITCHAN                   Minimum Access:  0
+
+-
+SYNTAX:
+k9 initchan #channelname <initialization key>
+-
+HELP:
+This command Activates k9 for a given channel provided
+the channel is setup and approved by Cservice and
+you have the proper key.
+You must type this command in a channel with k9 on it or
+
+use /msg k9 for privacy.
+For more information on how to use /msg, type: k9 help
+If you are completely lost, type: /join #doghouse and ask
+
+there for more help :o)
+-
+EXAMPLE:
+k9 initchan #vacations tr34sava71g
+This will activate channel #vacations if your e-mailed
+key was tr34sava71g
+
